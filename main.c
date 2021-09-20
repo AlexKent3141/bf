@@ -84,7 +84,7 @@ int run_program(
         // Check the value at the start location.
         // If it's zero the loop ends and can return.
         // Otherwise go back to the start.
-        if (m->cells[start_index] == 0)
+        if (m->cells[m->index] == 0)
         {
           return i;
         }
