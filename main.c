@@ -2,7 +2,7 @@
 #include "stdlib.h"
 
 #define DEFAULT_NUM_CELLS 30000
-#define DEFAULT_CELL_MAX 255
+#define DEFAULT_CELL_MAX 256
 #define MAX_PROGRAM_LENGTH 1000
 
 struct machine
