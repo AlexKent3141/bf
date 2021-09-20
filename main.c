@@ -30,9 +30,14 @@ void destroy_machine(struct machine* m)
   free(m);
 }
 
-void run_program(struct machine* m, const char* program)
+int run_program(
+  struct machine* m,
+  const char* program,
+  int program_start_index)
 {
-  for (int i = 0; i < strlen(program); i++)
+  int start_index = m->index;
+  int i;
+  for (i = program_start_index; i < strlen(program); i++)
   {
     char c = program[i];
     switch(c)
@@ -69,10 +74,31 @@ void run_program(struct machine* m, const char* program)
         printf("%d\n", m->cells[m->index]);
         fflush(stdout);
         break;
+      case '[':
+        // Start of a loop.
+        // Execute this in a separate call to run program.
+        i = run_program(m, program, i+1);
+        break;
+      case ']':
+        // End of a loop.
+        // Check the value at the start location.
+        // If it's zero the loop ends and can return.
+        // Otherwise go back to the start.
+        if (m->cells[start_index] == 0)
+        {
+          return i;
+        }
+        else
+        {
+          i = program_start_index - 1;
+        }
+        break;
       default:
         break;
     }
   }
+
+  return i;
 }
 
 // Interpreter for the Brainf**k programming language.
@@ -97,7 +123,7 @@ int main(int argc, char** argv)
   while (fgets(program, MAX_PROGRAM_LENGTH, stdin))
   {
     m = create_machine(num_cells, cell_max);
-    run_program(m, program);
+    run_program(m, program, 0);
     destroy_machine(m);
   }
 
