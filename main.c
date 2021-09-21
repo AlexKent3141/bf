@@ -123,11 +123,15 @@ int main(int argc, char** argv)
 
   struct machine* m;
   char program[MAX_PROGRAM_LENGTH];
+  printf("#: ");
+  fflush(stdout);
   while (fgets(program, MAX_PROGRAM_LENGTH, stdin))
   {
     m = create_machine(num_cells, cell_max);
     run_program(m, program, 0);
     destroy_machine(m);
+    printf("#: ");
+    fflush(stdout);
   }
 
   return 0;
