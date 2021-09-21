@@ -78,7 +78,8 @@ void print_machine_state(struct machine* m, int range)
 int run_program(
   struct machine* m,
   const char* program,
-  int program_start_index)
+  int program_start_index,
+  int ascii)
 {
   int i;
   for (i = program_start_index; i < strlen(program); i++)
@@ -115,7 +116,8 @@ int run_program(
         }
         break;
       case '.':
-        printf("%d\n", m->cells[m->index]);
+        const char* format = ascii ? "%c" : "%d\n";
+        printf(format, m->cells[m->index]);
         break;
       case ',':
         m->cells[m->index] = fgetc(stdin);
@@ -125,7 +127,7 @@ int run_program(
         // Execute this in a separate call to run program.
         if (m->cells[m->index] > 0)
         {
-          i = run_program(m, program, i+1);
+          i = run_program(m, program, i+1, ascii);
         }
         else
         {
@@ -154,12 +156,14 @@ int main(int argc, char** argv)
 
   int num_cells = DEFAULT_NUM_CELLS;
   int cell_max = DEFAULT_CELL_MAX;
+  int ascii = 0;
 
   struct argparse_option options[] =
   {
     OPT_HELP(),
     OPT_INTEGER('n', "num_cells", &num_cells, "number of cells"),
     OPT_INTEGER('m', "cell_max", &cell_max, "maximum value of a cell"),
+    OPT_BOOLEAN('a', "ascii", &ascii, "Assume ASCII encoding for output"),
     OPT_END()
   };
 
@@ -181,10 +185,10 @@ int main(int argc, char** argv)
       case 'q': goto cleanup;
       case 'r': reset_machine(m); break;
       case 'p': print_machine_state(m, 3); break;
-      default: run_program(m, line, 0);
+      default: run_program(m, line, 0, ascii);
     }
 
-    printf("#: ");
+    printf("\n#: ");
   }
 
 cleanup:
