@@ -36,6 +36,49 @@ void destroy_machine(struct machine* m)
   free(m);
 }
 
+// Show the pointer location and the cell values either side.
+void print_machine_state(struct machine* m)
+{
+  const int RANGE = 3;
+
+  // How many characters do we need per cell?
+  int max_val = max(m->cell_max, m->num_cells);
+  int num_chars = 0;
+  while (max_val)
+  {
+    ++num_chars;
+    max_val /= 10;
+  }
+
+  printf("v: ... ");
+
+  for (int i = 0; i < 2*RANGE + 1; i++)
+  {
+    int index = m->index + (i - RANGE);
+    if (index < 0) index += m->num_cells;
+    if (index >= m->num_cells) index -= m->num_cells;
+    printf("%*d ", num_chars, m->cells[index]);
+  }
+
+  printf(" ...\n");
+
+  printf("p: ... ");
+
+  for (int i = 0; i < 2*RANGE + 1; i++)
+  {
+    int index = m->index + (i - RANGE);
+    if (index < 0) index += m->num_cells;
+    if (index >= m->num_cells) index -= m->num_cells;
+    printf("%*d ", num_chars, index);
+  }
+
+  printf(" ...\n");
+
+  printf("%*s\n", (int)(7 + 0.5*(num_chars + 1)*(2*RANGE + 1)), "^");
+
+  fflush(stdout);
+}
+
 int run_program(
   struct machine* m,
   const char* program,
@@ -140,6 +183,10 @@ int main(int argc, char** argv)
     else if (line[0] == 'q')
     {
       break;
+    }
+    else if (line[0] == 'p')
+    {
+      print_machine_state(m);
     }
     else
     {
