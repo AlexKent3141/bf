@@ -4,7 +4,7 @@
 
 #define DEFAULT_NUM_CELLS 30000
 #define DEFAULT_CELL_MAX 256
-#define MAX_PROGRAM_LENGTH 1000
+#define MAX_PROGRAM_LENGTH 100000
 
 struct machine
 {
@@ -38,10 +38,8 @@ void destroy_machine(struct machine* m)
 }
 
 // Show the pointer location and the cell values either side.
-void print_machine_state(struct machine* m)
+void print_machine_state(struct machine* m, int range)
 {
-  const int RANGE = 3;
-
   // How many characters do we need per cell?
   int max_val = max(m->cell_max, m->num_cells);
   int num_chars = 0;
@@ -53,31 +51,28 @@ void print_machine_state(struct machine* m)
 
   printf("v: ... ");
 
-  for (int i = 0; i < 2*RANGE + 1; i++)
+  for (int i = 0; i < 2*range + 1; i++)
   {
-    int index = m->index + (i - RANGE);
+    int index = m->index + (i - range);
     if (index < 0) index += m->num_cells;
     if (index >= m->num_cells) index -= m->num_cells;
     printf("%*d ", num_chars, m->cells[index]);
   }
 
-  printf(" ...\n");
+  printf("...\n");
 
   printf("p: ... ");
 
-  for (int i = 0; i < 2*RANGE + 1; i++)
+  for (int i = 0; i < 2*range + 1; i++)
   {
-    int index = m->index + (i - RANGE);
+    int index = m->index + (i - range);
     if (index < 0) index += m->num_cells;
     if (index >= m->num_cells) index -= m->num_cells;
     printf("%*d ", num_chars, index);
   }
 
-  printf(" ...\n");
-
-  printf("%*s\n", (int)(7 + 0.5*(num_chars + 1)*(2*RANGE + 1)), "^");
-
-  fflush(stdout);
+  printf("...\n");
+  printf("%*s\n", (int)(7 + 0.5*(num_chars + 1)*(2*range + 1)), "^");
 }
 
 int run_program(
@@ -122,7 +117,6 @@ int run_program(
         break;
       case '.':
         printf("%d\n", m->cells[m->index]);
-        fflush(stdout);
         break;
       case ',':
         m->cells[m->index] = fgetc(stdin);
@@ -137,14 +131,8 @@ int run_program(
         // Check the value at the start location.
         // If it's zero the loop ends and can return.
         // Otherwise go back to the start.
-        if (m->cells[m->index] == 0)
-        {
-          return i;
-        }
-        else
-        {
-          i = program_start_index - 1;
-        }
+        if (m->cells[m->index] == 0) return i;
+        i = program_start_index - 1;
         break;
       default:
         break;
@@ -157,6 +145,8 @@ int run_program(
 // Interpreter for the Brainfuck programming language.
 int main(int argc, char** argv)
 {
+  setbuf(stdout, NULL);
+
   int num_cells = DEFAULT_NUM_CELLS;
   int cell_max = DEFAULT_CELL_MAX;
 
@@ -179,30 +169,20 @@ int main(int argc, char** argv)
   struct machine* m = create_machine(num_cells, cell_max);
   char line[MAX_PROGRAM_LENGTH];
   printf("#: ");
-  fflush(stdout);
   while (fgets(line, MAX_PROGRAM_LENGTH, stdin))
   {
-    if (line[0] == 'r')
+    switch (line[0])
     {
-      reset_machine(m);
-    }
-    else if (line[0] == 'q')
-    {
-      break;
-    }
-    else if (line[0] == 'p')
-    {
-      print_machine_state(m);
-    }
-    else
-    {
-      run_program(m, line, 0);
+      case 'q': goto cleanup;
+      case 'r': reset_machine(m); break;
+      case 'p': print_machine_state(m, 3); break;
+      default: run_program(m, line, 0);
     }
 
     printf("#: ");
-    fflush(stdout);
   }
 
+cleanup:
   destroy_machine(m);
 
   return 0;
