@@ -15,13 +15,19 @@ struct machine
 
 struct machine* create_machine(int num_cells, int cell_max)
 {
-  struct machine* machine = malloc(sizeof(struct machine));
-  machine->cells = malloc(num_cells*sizeof(int));
-  memset(machine->cells, 0, num_cells*sizeof(int));
-  machine->num_cells = num_cells;
-  machine->cell_max = cell_max;
-  machine->index = 0;
-  return machine;
+  struct machine* m = malloc(sizeof(struct machine));
+  m->cells = malloc(num_cells*sizeof(int));
+  memset(m->cells, 0, num_cells*sizeof(int));
+  m->num_cells = num_cells;
+  m->cell_max = cell_max;
+  m->index = 0;
+  return m;
+}
+
+void reset_machine(struct machine* m)
+{
+  memset(m->cells, 0, m->num_cells*sizeof(int));
+  m->index = 0;
 }
 
 void destroy_machine(struct machine* m)
@@ -121,18 +127,30 @@ int main(int argc, char** argv)
     }
   }
 
-  struct machine* m;
-  char program[MAX_PROGRAM_LENGTH];
+  struct machine* m = create_machine(num_cells, cell_max);
+  char line[MAX_PROGRAM_LENGTH];
   printf("#: ");
   fflush(stdout);
-  while (fgets(program, MAX_PROGRAM_LENGTH, stdin))
+  while (fgets(line, MAX_PROGRAM_LENGTH, stdin))
   {
-    m = create_machine(num_cells, cell_max);
-    run_program(m, program, 0);
-    destroy_machine(m);
+    if (line[0] == 'r')
+    {
+      reset_machine(m);
+    }
+    else if (line[0] == 'q')
+    {
+      break;
+    }
+    else
+    {
+      run_program(m, line, 0);
+    }
+
     printf("#: ");
     fflush(stdout);
   }
+
+  destroy_machine(m);
 
   return 0;
 }
