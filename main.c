@@ -74,6 +74,9 @@ int run_program(
         printf("%d\n", m->cells[m->index]);
         fflush(stdout);
         break;
+      case ',':
+        m->cells[m->index] = fgetc(stdin);
+        break;
       case '[':
         // Start of a loop.
         // Execute this in a separate call to run program.
