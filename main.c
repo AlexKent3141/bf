@@ -1,5 +1,6 @@
 #include "stdio.h"
 #include "stdlib.h"
+#include "argparse.h"
 
 #define DEFAULT_NUM_CELLS 30000
 #define DEFAULT_CELL_MAX 256
@@ -153,22 +154,27 @@ int run_program(
   return i;
 }
 
-// Interpreter for the Brainf**k programming language.
-// Can potentially be passed two command line arguments:
-// 1) The number of cells (default is 30000)
-// 2) The maximum value of a cell (default 1 byte, so 255)
+// Interpreter for the Brainfuck programming language.
 int main(int argc, char** argv)
 {
   int num_cells = DEFAULT_NUM_CELLS;
   int cell_max = DEFAULT_CELL_MAX;
-  if (argc > 1)
+
+  struct argparse_option options[] =
   {
-    num_cells = atoi(argv[1]);
-    if (argc > 2)
-    {
-      cell_max = atoi(argv[2]);
-    }
-  }
+    OPT_HELP(),
+    OPT_INTEGER('n', "num_cells", &num_cells, "number of cells"),
+    OPT_INTEGER('m', "cell_max", &cell_max, "maximum value of a cell"),
+    OPT_END()
+  };
+
+  struct argparse argparse;
+  argparse_init(&argparse, options, 0, 0);
+  argparse_describe(
+    &argparse,
+    "Interpreter for the Brainfuck programming language.",
+    0);
+  argc = argparse_parse(&argparse, argc, argv);
 
   struct machine* m = create_machine(num_cells, cell_max);
   char line[MAX_PROGRAM_LENGTH];
