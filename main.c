@@ -80,7 +80,6 @@ int run_program(
   const char* program,
   int program_start_index)
 {
-  int start_index = m->index;
   int i;
   for (i = program_start_index; i < strlen(program); i++)
   {
@@ -124,12 +123,18 @@ int run_program(
       case '[':
         // Start of a loop.
         // Execute this in a separate call to run program.
-        i = run_program(m, program, i+1);
+        if (m->cells[m->index] > 0)
+        {
+          i = run_program(m, program, i+1);
+        }
+        else
+        {
+          // Skip to end of loop.
+          while (program[i++] != ']');
+        }
         break;
       case ']':
-        // End of a loop.
-        // Check the value at the start location.
-        // If it's zero the loop ends and can return.
+        // If the current value is zero the loop ends.
         // Otherwise go back to the start.
         if (m->cells[m->index] == 0) return i;
         i = program_start_index - 1;
