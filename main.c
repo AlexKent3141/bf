@@ -116,8 +116,15 @@ int run_program(
         }
         break;
       case '.':
+#ifdef CODINGAME
+        if (m->cells[m->index] == 0)
+          printf(" ");
+        else
+          printf("%c", m->cells[m->index] - 1 + 'A');
+#else
         const char* format = ascii ? "%c" : "%d\n";
         printf(format, m->cells[m->index]);
+#endif
         break;
       case ',':
         m->cells[m->index] = fgetc(stdin);
@@ -158,6 +165,10 @@ int main(int argc, char** argv)
   int cell_max = DEFAULT_CELL_MAX;
   int ascii = 0;
 
+#ifdef CODINGAME
+  num_cells = 30;
+  cell_max = 27;
+#else
   struct argparse_option options[] =
   {
     OPT_HELP(),
@@ -174,6 +185,7 @@ int main(int argc, char** argv)
     "Interpreter for the Brainfuck programming language.",
     0);
   argc = argparse_parse(&argparse, argc, argv);
+#endif
 
   struct machine* m = create_machine(num_cells, cell_max);
   char line[MAX_PROGRAM_LENGTH];
