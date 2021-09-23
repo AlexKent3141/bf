@@ -1,5 +1,7 @@
+#include "math.h"
 #include "stdio.h"
 #include "stdlib.h"
+#include "string.h"
 #include "argparse.h"
 
 #define DEFAULT_NUM_CELLS 30000
@@ -41,7 +43,7 @@ void destroy_machine(struct machine* m)
 void print_machine_state(struct machine* m, int range)
 {
   // How many characters do we need per cell?
-  int max_val = max(m->cell_max, m->num_cells);
+  int max_val = fmax(m->cell_max, m->num_cells);
   int num_chars = 0;
   while (max_val)
   {
@@ -122,8 +124,10 @@ int run_program(
         else
           printf("%c", m->cells[m->index] - 1 + 'A');
 #else
-        const char* format = ascii ? "%c" : "%d\n";
-        printf(format, m->cells[m->index]);
+        {
+          const char* format = ascii ? "%c" : "%d\n";
+          printf(format, m->cells[m->index]);
+        }
 #endif
         break;
       case ',':
@@ -157,7 +161,7 @@ int run_program(
 }
 
 // Interpreter for the Brainfuck programming language.
-int main(int argc, char** argv)
+int main(int argc, const char** argv)
 {
   setbuf(stdout, NULL);
 

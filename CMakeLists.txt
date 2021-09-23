@@ -2,7 +2,9 @@ cmake_minimum_required (VERSION 3.16.3)
 project(brainfuck_interpreter LANGUAGES C)
 
 # Pull in argparse dependency.
-set(ARGPARSE_SHARED OFF CACHE BOOL "Only want the static version of argparse" FORCE)
+set(
+  ARGPARSE_SHARED OFF
+  CACHE BOOL "Only want the static version of argparse" FORCE)
 
 include(FetchContent)
 
@@ -31,3 +33,9 @@ add_executable(bf
 target_link_libraries(bf
   PRIVATE
     argparse)
+
+if (NOT MSVC)
+  target_link_libraries(bf
+    PRIVATE
+      m)
+endif()
